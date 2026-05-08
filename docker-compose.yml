@@ -1,0 +1,347 @@
+# version: '3.8'
+
+services:
+  # ===========================================
+  # Base de données PostgreSQL
+  # ===========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: bibliotheque-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: bibliotheque
+    ports:
+      - "5433:5432"        # ← CHANGE 5432 en 5433 (port externe uniquement)
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bibliotheque-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d bibliotheque"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Service Livres (Flask)
+  # ===========================================
+  livres:
+    build:
+      context: ./services/livres
+      dockerfile: Dockerfile
+    container_name: service-livres
+    ports:
+      - "8081:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+      - FLASK_ENV=development
+    volumes:
+      - ./services/livres:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    command: flask run --host=0.0.0.0 --reload
+
+  # ===========================================
+  # Service Utilisateurs (Flask)
+  # ===========================================
+  utilisateurs:
+    build:
+      context: ./services/utilisateurs
+      dockerfile: Dockerfile
+    container_name: service-utilisateurs
+    ports:
+      - "8082:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+      - FLASK_ENV=development
+    volumes:
+      - ./services/utilisateurs:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    command: flask run --host=0.0.0.0 --reload
+
+  # ===========================================
+  # Service Emprunts (Flask)
+  # ===========================================
+  emprunts:
+    build:
+      context: ./services/emprunts
+      dockerfile: Dockerfile
+    container_name: service-emprunts
+    ports:
+      - "8083:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+      - FLASK_ENV=development
+    volumes:
+      - ./services/emprunts:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    command: flask run --host=0.0.0.0 --reload
+
+  # ===========================================
+  # Service Recommandation (FastAPI)
+  # ===========================================
+  recommandation:
+    build:
+      context: ./services/recommandation
+      dockerfile: Dockerfile
+      target: development
+    container_name: service-recommandation
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+    volumes:
+      - ./services/recommandation:/app
+      - model_data:/app/model
+      - training_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ===========================================
+  # Frontend React
+  # ===========================================
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: frontend-react
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_LIVRES=http://localhost:8081
+      - REACT_APP_API_UTILISATEURS=http://localhost:8082
+      - REACT_APP_API_EMPRUNTS=http://localhost:8083
+      - REACT_APP_API_RECOMMANDATION=http://localhost:8000
+    volumes:
+      - ./services/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - livres
+      - utilisateurs
+      - emprunts
+      - recommandation
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    # ===========================================
+  # Service Auth (Flask + JWT)
+  # ===========================================
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: service-auth
+    ports:
+      - "8084:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+      - JWT_SECRET=dit-bibliotheque-secret-key-2026
+      - FLASK_ENV=development
+    volumes:
+      - ./services/auth:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - dev
+    command: flask run --host=0.0.0.0 --reload
+
+  auth-prod:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: service-auth-prod
+    ports:
+      - "8084:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+      - JWT_SECRET=dit-bibliotheque-secret-key-2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod    
+
+  # ===========================================
+  # Services PRODUCTION (sans hot-reload)
+  # ===========================================
+  livres-prod:
+    build:
+      context: ./services/livres
+      dockerfile: Dockerfile
+    container_name: service-livres-prod
+    ports:
+      - "8081:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod
+
+  utilisateurs-prod:
+    build:
+      context: ./services/utilisateurs
+      dockerfile: Dockerfile
+    container_name: service-utilisateurs-prod
+    ports:
+      - "8082:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod
+
+  emprunts-prod:
+    build:
+      context: ./services/emprunts
+      dockerfile: Dockerfile
+    container_name: service-emprunts-prod
+    ports:
+      - "8083:5000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod
+
+  recommandation-prod:
+    build:
+      context: ./services/recommandation
+      dockerfile: Dockerfile
+      target: production
+    container_name: service-recommandation-prod
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_NAME=bibliotheque
+    volumes:
+      - model_data:/app/model
+      - training_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod
+
+  frontend-prod:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: frontend-react-prod
+    ports:
+      - "3000:80"
+    depends_on:
+      - livres-prod
+      - utilisateurs-prod
+      - emprunts-prod
+      - recommandation-prod
+    networks:
+      - bibliotheque-network
+    profiles:
+      - prod
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres_data:
+    name: bibliotheque_postgres_data
+  model_data:
+    name: bibliotheque_model_data
+  training_data:
+    name: bibliotheque_training_data
+
+# ===========================================
+# Réseau
+# ===========================================
+networks:
+  bibliotheque-network:
+    name: bibliotheque-network
+    driver: bridge
