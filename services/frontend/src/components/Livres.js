@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiBookOpen, FiCalendar, FiHash, FiUser, FiTag, FiBookmark } from 'react-icons/fi';
 
 const API_URL = 'http://localhost:8081/api/livres';
 
@@ -26,22 +27,30 @@ function Livres() {
     }
   };
 
-  if (loading) return <div className="loading">⏳ Chargement des livres...</div>;
+  if (loading) return (
+    <div className="loading">
+      <FiBookOpen className="spinner" size={40} />
+      <p>Chargement du catalogue...</p>
+    </div>
+  );
+  
   if (error) return <div className="error">❌ {error}</div>;
 
   return (
     <div>
-      <h2>📖 Catalogue des Livres</h2>
+      <h2><FiBookOpen style={{marginRight:'10px'}} />Catalogue des Livres</h2>
+      <p className="subtitle">{livres.length} livres disponibles</p>
+      
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Titre</th>
-            <th>Auteur</th>
-            <th>ISBN</th>
-            <th>Catégorie</th>
-            <th>Année</th>
-            <th>Exemplaires</th>
+            <th><FiHash size={14} /> ID</th>
+            <th><FiBookOpen size={14} /> Titre</th>
+            <th><FiUser size={14} /> Auteur</th>
+            <th><FiBookmark size={14} /> ISBN</th>
+            <th><FiTag size={14} /> Catégorie</th>
+            <th><FiCalendar size={14} /> Année</th>
+            <th>Ex.</th>
           </tr>
         </thead>
         <tbody>
@@ -50,10 +59,14 @@ function Livres() {
               <td>{livre.id}</td>
               <td><strong>{livre.titre}</strong></td>
               <td>{livre.auteur}</td>
-              <td>{livre.isbn}</td>
-              <td>{livre.categorie || 'N/A'}</td>
+              <td><code>{livre.isbn}</code></td>
+              <td>
+                <span className="badge-categorie">
+                  {livre.categorie || 'N/A'}
+                </span>
+              </td>
               <td>{livre.annee_publication || 'N/A'}</td>
-              <td>{livre.nombre_exemplaires}</td>
+              <td className="text-center">{livre.nombre_exemplaires}</td>
             </tr>
           ))}
         </tbody>
