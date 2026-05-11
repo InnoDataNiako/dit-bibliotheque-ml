@@ -1,77 +1,23 @@
-// import React, { useState } from 'react';
-// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import './App.css';
-// import Navbar from './components/Navbar';
-// import Login from './pages/Login';
-// import Register from './pages/Register';
-// import Dashboard from './pages/Dashboard';
-// import Livres from './pages/Livres';
-// import Utilisateurs from './pages/Utilisateurs';
-// import Emprunts from './pages/Emprunts';
-// import Recommandations from './pages/Recommandations';
-
-// function App() {
-//   const [user, setUser] = useState(() => {
-//     const saved = localStorage.getItem('user');
-//     return saved ? JSON.parse(saved) : null;
-//   });
-
-//   const handleLogin = (userData) => {
-//     setUser(userData);
-//     localStorage.setItem('user', JSON.stringify(userData));
-//   };
-
-//   const handleLogout = () => {
-//     setUser(null);
-//     localStorage.removeItem('user');
-//   };
-
-//   if (!user) {
-//     return (
-//       <Router>
-//         <Routes>
-//           <Route path="/login" element={<Login onLogin={handleLogin} />} />
-//           <Route path="/register" element={<Register />} />
-//           <Route path="*" element={<Navigate to="/login" />} />
-//         </Routes>
-//       </Router>
-//     );
-//   }
-
-//   return (
-//     <Router>
-//       <div className="App">
-//         <Navbar user={user} onLogout={handleLogout} />
-//         <main className="container">
-//           <Routes>
-//             <Route path="/" element={<Dashboard />} />
-//             <Route path="/livres" element={<Livres />} />
-//             <Route path="/utilisateurs" element={<Utilisateurs />} />
-//             <Route path="/emprunts" element={<Emprunts />} />
-//             <Route path="/recommandations" element={<Recommandations />} />
-//             <Route path="*" element={<Navigate to="/" />} />
-//           </Routes>
-//         </main>
-//       </div>
-//     </Router>
-//   );
-// }
-
-// export default App;
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import AdminLayout from './components/AdminLayout';
+import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Catalogue from './pages/Catalogue';
 import MesEmprunts from './pages/MesEmprunts';
+import Recommandations from './pages/Recommandations';
 import AdminLivres from './pages/admin/LivresCRUD';
 import AdminEmprunts from './pages/admin/Emprunts';
 import AdminUsers from './pages/admin/Users';
-import Recommandations from './pages/Recommandations';
+import AdminCategories from './pages/admin/Categories';
+import AdminDashboard from './pages/admin/Dashboard';
+import Favoris from './pages/Favoris';
+
+// Dans les routes admin :
 import './App.css';
 
 function PrivateRoute({ children, adminOnly = false }) {
@@ -83,31 +29,70 @@ function PrivateRoute({ children, adminOnly = false }) {
 }
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   return (
     <div className="App">
-      {user && <Navbar />}
-      <main className="container">
-        <Routes>
-          {/* Public */}
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+      {/* Affiche la Navbar pour TOUT le monde SAUF sur les pages admin */}
+      {user && window.location.pathname.startsWith('/admin') ? null : user && <Navbar />}
+      
+      <Routes>
+        {/* Pages publiques */}
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
 
-          {/* User */}
-          <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/catalogue" element={<PrivateRoute><Catalogue /></PrivateRoute>} />
-          <Route path="/mes-emprunts" element={<PrivateRoute><MesEmprunts /></PrivateRoute>} />
-          <Route path="/recommandations" element={<PrivateRoute><Recommandations /></PrivateRoute>} />
+        {/* Accueil - Même vue pour tout le monde */}
+        <Route path="/" element={
+          <PrivateRoute>
+            <main className="container"><Dashboard /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
 
-          {/* Admin */}
-          <Route path="/admin/livres" element={<PrivateRoute adminOnly><AdminLivres /></PrivateRoute>} />
-          <Route path="/admin/emprunts" element={<PrivateRoute adminOnly><AdminEmprunts /></PrivateRoute>} />
-          <Route path="/admin/users" element={<PrivateRoute adminOnly><AdminUsers /></PrivateRoute>} />
+        {/* Pages utilisateur avec Navbar */}
+        <Route path="/catalogue" element={
+          <PrivateRoute>
+            <main className="container"><Catalogue /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
+        <Route path="/mes-emprunts" element={
+          <PrivateRoute>
+            <main className="container"><MesEmprunts /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
+        <Route path="/recommandations" element={
+          <PrivateRoute>
+            <main className="container"><Recommandations /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
+         {/* AJOUTE ICI */}
+<Route path="/favoris" element={
+  <PrivateRoute>
+    <main className="container"><Favoris /></main>
+    <Footer />
+  </PrivateRoute>
+} />
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </main>
+        {/* Pages Admin avec Sidebar (pas de Navbar normale) */}
+        <Route path="/admin/*" element={
+          <PrivateRoute adminOnly>
+            <AdminLayout>
+              <Routes>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="livres" element={<AdminLivres />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="emprunts" element={<AdminEmprunts />} />
+                <Route path="users" element={<AdminUsers />} />
+              </Routes>
+            </AdminLayout>
+          </PrivateRoute>
+        } />
+
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </div>
   );
 }

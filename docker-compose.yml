@@ -44,6 +44,8 @@ services:
       - FLASK_ENV=development
     volumes:
       - ./services/livres:/app
+      - uploads_data:/app/uploads   # ← AJOUTE CECI
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -337,7 +339,8 @@ volumes:
     name: bibliotheque_model_data
   training_data:
     name: bibliotheque_training_data
-
+  uploads_data:
+    name: bibliotheque_uploads
 # ===========================================
 # Réseau
 # ===========================================

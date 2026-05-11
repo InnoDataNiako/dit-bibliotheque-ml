@@ -38,6 +38,7 @@ function Catalogue() {
   };
 
   return (
+    <div className="container">
     <div>
       <h2><FiBookOpen /> Catalogue des Livres</h2>
       <p className="subtitle">{filtered.length} livres disponibles</p>
@@ -70,6 +71,7 @@ function Catalogue() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }

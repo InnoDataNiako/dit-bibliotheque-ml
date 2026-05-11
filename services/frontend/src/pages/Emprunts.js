@@ -1,83 +1,124 @@
 import React, { useState, useEffect } from 'react';
-import { FiClipboard, FiDownload, FiRotateCcw, FiCheckCircle, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
+import { FiBookOpen, FiClock, FiCalendar, FiRotateCcw, FiInbox } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { Link } from 'react-router-dom';
 
-function Emprunts() {
+function MesEmprunts() {
+  const { user } = useAuth();
   const [emprunts, setEmprunts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => { loadEmprunts(); }, []);
 
   const loadEmprunts = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getEmprunts();
-      setEmprunts(data);
-    } catch (err) { setError(err.message); } finally { setLoading(false); }
+    const all = await api.getEmprunts();
+    setEmprunts(all.filter(e => e.utilisateur_id === user.id));
+    setLoading(false);
   };
 
   const handleRetour = async (id) => {
-    if (window.confirm('Confirmer le retour de ce livre ?')) {
-      await api.retournerLivre(id);
-      loadEmprunts();
-    }
+    await api.retourner(id);
+    loadEmprunts();
   };
 
-  const handleExport = async () => {
-    const csv = await api.exportCSV();
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'loans.csv'; a.click();
+  const getJoursRestants = (dateRetour) => {
+    const diff = Math.ceil((new Date(dateRetour) - new Date()) / (1000 * 60 * 60 * 24));
+    return diff;
   };
 
-  const getStatutBadge = (statut) => {
-    switch (statut) {
-      case 'En cours': return <span className="badge badge-en-cours"><FiRefreshCw size={12} /> En cours</span>;
-      case 'Retourné': return <span className="badge badge-retourne"><FiCheckCircle size={12} /> Retourné</span>;
-      case 'En retard': return <span className="badge badge-en-retard"><FiAlertCircle size={12} /> En retard</span>;
-      default: return <span className="badge">{statut}</span>;
-    }
+  const getStatutClass = (statut, dateRetour) => {
+    if (statut === 'Retourné') return 'retourne';
+    if (statut === 'En retard') return 'retard';
+    const jours = getJoursRestants(dateRetour);
+    if (jours < 0) return 'retard';
+    return 'en-cours';
   };
 
-  const actifs = emprunts.filter(e => e.statut !== 'Retourné').length;
+  const enCours = emprunts.filter(e => e.statut !== 'Retourné').length;
+  const enRetard = emprunts.filter(e => e.statut === 'En retard' || (e.statut === 'En cours' && getJoursRestants(e.date_retour_prevue) < 0)).length;
 
-  if (loading) return <div className="loading"><FiClipboard className="spinner" size={40} /><p>Chargement...</p></div>;
+  if (loading) return <div className="loading"><FiBookOpen className="spinner" size={40} /><p>Chargement...</p></div>;
 
   return (
-    <div>
-      <div className="page-header">
-        <h2><FiClipboard /> Historique des Emprunts</h2>
-        <button className="btn btn-primary" onClick={handleExport}><FiDownload /> Exporter CSV</button>
+    <div className="emprunts-container">
+      <div className="emprunts-header">
+        <h2><FiBookOpen /> Mes Emprunts</h2>
       </div>
-      <p className="subtitle">{emprunts.length} emprunts • {actifs} actifs</p>
-      {error && <div className="error">{error}</div>}
 
-      <table>
-        <thead>
-          <tr><th>#</th><th>Utilisateur</th><th>Livre</th><th>Emprunt</th><th>Retour prévu</th><th>Statut</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-          {emprunts.map(e => (
-            <tr key={e.id} className={e.statut === 'En retard' ? 'row-retard' : ''}>
-              <td>{e.id}</td>
-              <td>{e.prenom} {e.nom}</td>
-              <td><strong>{e.titre}</strong><br/><small>{e.auteur}</small></td>
-              <td>{new Date(e.date_emprunt).toLocaleDateString('fr-FR')}</td>
-              <td>{new Date(e.date_retour_prevue).toLocaleDateString('fr-FR')}</td>
-              <td>{getStatutBadge(e.statut)}</td>
-              <td>
-                {e.statut !== 'Retourné' && (
-                  <button className="btn-icon success" onClick={() => handleRetour(e.id)} title="Retourner"><FiRotateCcw /></button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="emprunts-stats">
+        <div className="emprunt-stat-mini">
+          <strong>{emprunts.length}</strong>
+          <span>Total</span>
+        </div>
+        <div className="emprunt-stat-mini">
+          <strong>{enCours}</strong>
+          <span>En cours</span>
+        </div>
+        <div className="emprunt-stat-mini">
+          <strong style={{color:'#dc2626'}}>{enRetard}</strong>
+          <span>En retard</span>
+        </div>
+      </div>
+
+      {emprunts.length === 0 ? (
+        <div className="empty-emprunts">
+          <FiInbox size={50} />
+          <h3>Aucun emprunt</h3>
+          <p>Vous n'avez pas encore emprunté de livre.</p>
+          <Link to="/catalogue" className="btn btn-primary">
+            <FiBookOpen /> Parcourir le catalogue
+          </Link>
+        </div>
+      ) : (
+        emprunts.map(e => {
+          const statutClass = getStatutClass(e.statut, e.date_retour_prevue);
+          const jours = getJoursRestants(e.date_retour_prevue);
+          
+          return (
+            <div key={e.id} className={`emprunt-card ${statutClass}`}>
+              <div className="emprunt-book-info">
+                <div className="emprunt-book-cover">
+                  <FiBookOpen size={28} />
+                </div>
+                <div className="emprunt-book-details">
+                  <h3>{e.titre}</h3>
+                  <p className="author">✍️ {e.auteur}</p>
+                  <span className={`emprunt-statut-badge ${statutClass === 'retard' ? 'retard' : statutClass === 'retourne' ? 'retourne' : 'en-cours'}`}>
+                    {statutClass === 'retard' ? '🔴 En retard' : statutClass === 'retourne' ? '✅ Retourné' : '🟡 En cours'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="emprunt-dates">
+                <div className="emprunt-date">
+                  <span className="emprunt-date-label"><FiCalendar size={12} /> Emprunté le</span>
+                  <span className="emprunt-date-value">{new Date(e.date_emprunt).toLocaleDateString('fr-FR')}</span>
+                </div>
+                <div className="emprunt-date">
+                  <span className="emprunt-date-label"><FiClock size={12} /> Retour prévu</span>
+                  <span className="emprunt-date-value">{new Date(e.date_retour_prevue).toLocaleDateString('fr-FR')}</span>
+                  {e.statut !== 'Retourné' && (
+                    <span className={`jours-restants ${jours < 0 ? 'urgent' : jours <= 2 ? 'warning' : 'ok'}`}>
+                      {jours < 0 ? `⚠️ ${Math.abs(jours)}j de retard` : jours === 0 ? "Aujourd'hui !" : `${jours}j restants`}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {e.statut !== 'Retourné' && (
+                <div className="emprunt-action">
+                  <button className="btn-retour" onClick={() => handleRetour(e.id)}>
+                    <FiRotateCcw /> Retourner
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
 
-export default Emprunts;
+export default MesEmprunts;
