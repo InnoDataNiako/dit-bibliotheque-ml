@@ -1,0 +1,49 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python dvc/preprocess.py
+    deps:
+    - path: data/loans.csv
+      hash: md5
+      md5: 3452ffbadede3a86fdac2e75e14563b0
+      size: 542
+    - path: dvc/preprocess.py
+      hash: md5
+      md5: cdda3384fd68aae00900e6d1fe69d9ed
+      size: 358
+    outs:
+    - path: data/loans_clean.csv
+      hash: md5
+      md5: b0f67bc722f55cff1c4d6e2f55228ee4
+      size: 537
+  train:
+    cmd: python dvc/train.py
+    deps:
+    - path: data/loans_clean.csv
+      hash: md5
+      md5: b0f67bc722f55cff1c4d6e2f55228ee4
+      size: 537
+    - path: dvc/train.py
+      hash: md5
+      md5: 2c5dbac193ed0c00e4ba5c1ee004a6ea
+      size: 1202
+    outs:
+    - path: data/metrics.json
+      hash: md5
+      md5: cce93cc0ec0d677e61b67da8c73ae65e
+      size: 26
+    - path: data/model.pkl
+      hash: md5
+      md5: 6e5fbe04e7943561fd46fc3ca0871dc2
+      size: 1031
+  evaluate:
+    cmd: python dvc/evaluate.py
+    deps:
+    - path: data/metrics.json
+      hash: md5
+      md5: cce93cc0ec0d677e61b67da8c73ae65e
+      size: 26
+    - path: dvc/evaluate.py
+      hash: md5
+      md5: 2245394afabe6c5dc3a82e02f00f5eba
+      size: 328
