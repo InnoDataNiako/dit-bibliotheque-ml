@@ -1,0 +1,25 @@
+stages:
+  preprocess:
+    cmd: python dvc/preprocess.py
+    deps:
+      - data/loans.csv
+      - dvc/preprocess.py
+    outs:
+      - data/loans_clean.csv
+
+  train:
+    cmd: python dvc/train.py
+    deps:
+      - data/loans_clean.csv
+      - dvc/train.py
+    outs:
+      - data/model.pkl
+    metrics:
+      - data/metrics.json:
+          cache: false
+
+  evaluate:
+    cmd: python dvc/evaluate.py
+    deps:
+      - data/metrics.json
+      - dvc/evaluate.py
