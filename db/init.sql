@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS livres (
     date_ajout TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+
 -- ============================================
 -- Table : emprunts
 -- ============================================
@@ -45,18 +47,38 @@ CREATE TABLE IF NOT EXISTS emprunts (
     statut statut_emprunt DEFAULT 'En cours'
 );
 
+-- Ajoute APRÈS les types ENUM existants :
+
+-- Table users pour l'authentification
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'etudiant' CHECK (role IN ('admin', 'bibliothecaire', 'etudiant', 'professeur')),
+    date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Ajout d'un admin par défaut (admin@dit.sn / admin123)
+-- Le hash bcrypt de 'admin123' est pré-généré
+INSERT INTO users (nom, prenom, email, password_hash, role) VALUES
+('Admin', 'DIT', 'admin@dit.sn', '$2b$12$LJ3m4ys3GZfnYMz8kVsKaOTSxPxjWJzqZ1AX0RQTUxJWZKwPhwutu', 'admin'),
+('Bibliothécaire', 'DIT', 'biblio@dit.sn', '$2b$12$LJ3m4ys3GZfnYMz8kVsKaOTSxPxjWJzqZ1AX0RQTUxJWZKwPhwutu', 'bibliothecaire');
+
 -- ============================================
 -- Index pour les recherches fréquentes
 -- ============================================
-CREATE INDEX idx_livres_titre ON livres(titre);
-CREATE INDEX idx_livres_auteur ON livres(auteur);
-CREATE INDEX idx_livres_isbn ON livres(isbn);
-CREATE INDEX idx_emprunts_utilisateur ON emprunts(utilisateur_id);
-CREATE INDEX idx_emprunts_livre ON emprunts(livre_id);
-CREATE INDEX idx_emprunts_statut ON emprunts(statut);
+CREATE INDEX IF NOT EXISTS idx_livres_titre ON livres(titre);
+CREATE INDEX IF NOT EXISTS idx_livres_auteur ON livres(auteur);
+CREATE INDEX IF NOT EXISTS idx_livres_isbn ON livres(isbn);
+CREATE INDEX IF NOT EXISTS idx_emprunts_utilisateur ON emprunts(utilisateur_id);
+CREATE INDEX IF NOT EXISTS idx_emprunts_livre ON emprunts(livre_id);
+CREATE INDEX IF NOT EXISTS idx_emprunts_statut ON emprunts(statut);
 
 -- ============================================
--- Données de test (optionnel)
+-- Données de test
 -- ============================================
 INSERT INTO utilisateurs (nom, prenom, email, type_utilisateur) VALUES
 ('Diop', 'Moussa', 'moussa.diop@dit.sn', 'Etudiant'),
