@@ -24,3 +24,6 @@ Thumbs.db
 
 # Docker (optionnel selon besoin)
 # .env
+!.dvc
+!data/loans.csv.dvc
+!data/.gitignore
