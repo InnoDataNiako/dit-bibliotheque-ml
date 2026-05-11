@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-RUN groupadd -r flaskuser && useradd -r -g flaskuser flaskuser
+RUN groupadd -r authuser && useradd -r -g authuser authuser
 
 WORKDIR /app
 
@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chown -R flaskuser:flaskuser /app
-USER flaskuser
+RUN chown -R authuser:authuser /app
+USER authuser
 
 EXPOSE 5000
 
