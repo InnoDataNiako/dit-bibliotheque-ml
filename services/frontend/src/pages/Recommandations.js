@@ -47,7 +47,7 @@ function Recommandations() {
         </div>
       ) : (
         <div className="reco-input">
-          <p style={{fontSize:16}}><FiUser size={20} /> Bonjour <strong>{user?.prenom} {user?.nom}</strong>, voici vos recommandations personnalisees !</p>
+          <p style={{fontSize:16}}><FiUser size={20} /> Bonjour <strong>{user?.prenom} {user?.nom}</strong>, decouvrez les livres que notre IA a selectionnes specialement pour vous ! Cliquez sur me recommander</p>
           <button className="btn btn-primary" onClick={() => { setUserId(user?.id); fetchRecommandations(); }}>
             <FiTrendingUp /> Me recommander
           </button>

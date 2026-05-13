@@ -112,7 +112,7 @@
     
 #     cur.execute('''
 #         UPDATE emprunts
-#         SET date_retour_effective = %s, statut = 'Retourne'
+#         SET date_retour_effective = %s, statut = 'Retourné'
 #         WHERE id = %s
 #         RETURNING *
 #     ''', (today, id))
@@ -320,7 +320,7 @@ def retourner(id):
     if emprunt['statut'] == 'Retourne':
         cur.close(); conn.close()
         return jsonify({'error': 'Livre deja retourne'}), 400
-    cur.execute("UPDATE emprunts SET date_retour_effective = %s, statut = 'Retourne' WHERE id = %s RETURNING *", (date.today(), id))
+    cur.execute("UPDATE emprunts SET date_retour_effective = %s, statut = 'Retourné' WHERE id = %s RETURNING *", (date.today(), id))
     conn.commit()
     emprunt = cur.fetchone()
     cur.close(); conn.close()
