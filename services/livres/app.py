@@ -41,13 +41,12 @@ def upload_image():
     
     return jsonify({'error': 'Format non autorisé (png, jpg, jpeg, gif, webp)'}), 400
 
-# Servir les images uploadées
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 # ============================================
-# 1. GET /api/livres - Liste tous les livres
+# GET /api/livres
 # ============================================
 @app.route('/api/livres', methods=['GET'])
 def get_livres():
@@ -60,7 +59,7 @@ def get_livres():
     return jsonify(livres), 200
 
 # ============================================
-# 2. GET /api/livres/<id> - Détail
+# GET /api/livres/<id>
 # ============================================
 @app.route('/api/livres/<int:id>', methods=['GET'])
 def get_livre(id):
@@ -75,7 +74,7 @@ def get_livre(id):
     return jsonify(livre), 200
 
 # ============================================
-# 3. POST /api/livres - Ajouter
+# POST /api/livres - Ajouter
 # ============================================
 @app.route('/api/livres', methods=['POST'])
 def add_livre():
@@ -91,8 +90,8 @@ def add_livre():
     
     try:
         cur.execute('''
-            INSERT INTO livres (titre, auteur, isbn, categorie, annee_publication, nombre_exemplaires, image_url, description)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO livres (titre, auteur, isbn, categorie, annee_publication, nombre_exemplaires, image_url, description, is_new)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING *
         ''', (
             data['titre'],
@@ -102,7 +101,8 @@ def add_livre():
             data.get('annee_publication', None),
             data.get('nombre_exemplaires', 1),
             data.get('image_url', None),
-            data.get('description', None)
+            data.get('description', None),
+            data.get('is_new', False)
         ))
         conn.commit()
         livre = cur.fetchone()
@@ -117,7 +117,7 @@ def add_livre():
         return jsonify({'error': 'ISBN déjà existant'}), 409
 
 # ============================================
-# 4. PUT /api/livres/<id> - Modifier
+# PUT /api/livres/<id> - Modifier
 # ============================================
 @app.route('/api/livres/<int:id>', methods=['PUT'])
 def update_livre(id):
@@ -141,7 +141,8 @@ def update_livre(id):
             annee_publication = COALESCE(%s, annee_publication),
             nombre_exemplaires = COALESCE(%s, nombre_exemplaires),
             image_url = COALESCE(%s, image_url),
-            description = COALESCE(%s, description)
+            description = COALESCE(%s, description),
+            is_new = COALESCE(%s, is_new)
         WHERE id = %s
         RETURNING *
     ''', (
@@ -153,6 +154,7 @@ def update_livre(id):
         data.get('nombre_exemplaires'),
         data.get('image_url'),
         data.get('description'),
+        data.get('is_new'),
         id
     ))
     conn.commit()
@@ -162,7 +164,7 @@ def update_livre(id):
     return jsonify(livre), 200
 
 # ============================================
-# 5. DELETE /api/livres/<id>
+# DELETE /api/livres/<id>
 # ============================================
 @app.route('/api/livres/<int:id>', methods=['DELETE'])
 def delete_livre(id):
@@ -178,7 +180,7 @@ def delete_livre(id):
     return jsonify({'message': 'Livre supprimé avec succès'}), 200
 
 # ============================================
-# 6. GET /api/livres/search
+# GET /api/livres/search
 # ============================================
 @app.route('/api/livres/search', methods=['GET'])
 def search_livres():
@@ -211,12 +213,9 @@ def search_livres():
 def health():
     return jsonify({'status': 'ok', 'service': 'livres'}), 200
 
-
 # ============================================
 # GESTION DES CATÉGORIES
 # ============================================
-
-# GET /api/categories - Liste
 @app.route('/api/categories', methods=['GET'])
 def get_categories():
     conn = get_db()
@@ -227,7 +226,6 @@ def get_categories():
     conn.close()
     return jsonify(categories), 200
 
-# POST /api/categories - Ajouter
 @app.route('/api/categories', methods=['POST'])
 def add_categorie():
     data = request.get_json()
@@ -241,7 +239,7 @@ def add_categorie():
             INSERT INTO categories (nom, description, couleur)
             VALUES (%s, %s, %s)
             RETURNING *
-        ''', (data['nom'], data.get('description', ''), data.get('couleur', '#667eea')))
+        ''', (data['nom'], data.get('description', ''), data.get('couleur', '#dc2626')))
         conn.commit()
         cat = cur.fetchone()
         cur.close()
@@ -253,7 +251,6 @@ def add_categorie():
         conn.close()
         return jsonify({'error': 'Catégorie déjà existante'}), 409
 
-# PUT /api/categories/<id> - Modifier
 @app.route('/api/categories/<int:id>', methods=['PUT'])
 def update_categorie(id):
     data = request.get_json()
@@ -277,7 +274,6 @@ def update_categorie(id):
         return jsonify({'error': 'Catégorie non trouvée'}), 404
     return jsonify(cat), 200
 
-# DELETE /api/categories/<id>
 @app.route('/api/categories/<int:id>', methods=['DELETE'])
 def delete_categorie(id):
     conn = get_db()
@@ -290,16 +286,16 @@ def delete_categorie(id):
     if deleted is None:
         return jsonify({'error': 'Catégorie non trouvée'}), 404
     return jsonify({'message': 'Catégorie supprimée'}), 200
+
 # ============================================
 # WISHLIST / FAVORIS
 # ============================================
-
 @app.route('/api/wishlist/<int:user_id>', methods=['GET'])
 def get_wishlist(user_id):
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute('''
-        SELECT w.*, l.titre, l.auteur, l.isbn, l.categorie 
+        SELECT w.*, l.titre, l.auteur, l.isbn, l.categorie, l.image_url 
         FROM wishlist w JOIN livres l ON w.livre_id = l.id 
         WHERE w.utilisateur_id = %s ORDER BY w.date_ajout DESC
     ''', (user_id,))
@@ -335,4 +331,3 @@ def toggle_wishlist():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-

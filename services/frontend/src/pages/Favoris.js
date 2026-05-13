@@ -41,7 +41,7 @@ function Favoris() {
         <div className="empty-emprunts">
           <FiHeart size={50} />
           <h3>Aucun favori</h3>
-          <p>Ajoutez des livres à vos favoris pour les retrouver facilement.</p>
+          <p>Ajoutez des livres a vos favoris pour les retrouver facilement.</p>
           <Link to="/catalogue" className="btn btn-primary">
             <FiBookOpen /> Parcourir le catalogue
           </Link>
@@ -51,13 +51,19 @@ function Favoris() {
           {favoris.map(fav => (
             <div key={fav.id} className="book-card-pro">
               <div className="book-cover-pro">
-                <FiBookOpen size={40} />
+                {fav.image_url ? (
+                  <img src={fav.image_url} alt={fav.titre} />
+                ) : (
+                  <div className="book-cover-placeholder">
+                    <FiBookOpen size={40} />
+                  </div>
+                )}
               </div>
               <div className="book-body-pro">
                 <h3 className="book-title-pro">{fav.titre}</h3>
-                <p className="book-author-pro">✍️ {fav.auteur}</p>
+                <p className="book-author-pro">{fav.auteur}</p>
                 <p className="book-isbn-pro">{fav.isbn}</p>
-                <span className="badge-categorie">{fav.categorie || 'Général'}</span>
+                <span className="badge-categorie">{fav.categorie || 'General'}</span>
                 <button className="btn-emprunt-pro" onClick={() => handleRemove(fav.livre_id)} style={{marginTop:'10px', background:'#666'}}>
                   <FiTrash2 size={14} /> Retirer des favoris
                 </button>

@@ -16,7 +16,7 @@ function AdminSidebar({ isOpen, onClose }) {
     { to: '/admin/categories', icon: <FiTag size={18} />, label: 'Catégories' },
     { to: '/admin/emprunts', icon: <FiClipboard size={18} />, label: 'Gérer Emprunts' },
     { to: '/admin/users', icon: <FiUsers size={18} />, label: 'Gérer Utilisateurs' },
-    { to: '/recommandations', icon: <FiTrendingUp size={18} />, label: 'Recommandations IA' },
+    { to: '/admin/recommandations', icon: <FiTrendingUp size={18} />, label: 'Recommandations IA' },
   ];
 
   const userLinks = [

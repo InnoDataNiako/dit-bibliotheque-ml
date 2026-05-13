@@ -10,14 +10,13 @@ import Dashboard from './pages/Dashboard';
 import Catalogue from './pages/Catalogue';
 import MesEmprunts from './pages/MesEmprunts';
 import Recommandations from './pages/Recommandations';
+import Profil from './pages/Profil';
 import AdminLivres from './pages/admin/LivresCRUD';
 import AdminEmprunts from './pages/admin/Emprunts';
 import AdminUsers from './pages/admin/Users';
 import AdminCategories from './pages/admin/Categories';
 import AdminDashboard from './pages/admin/Dashboard';
 import Favoris from './pages/Favoris';
-
-// Dans les routes admin :
 import './App.css';
 
 function PrivateRoute({ children, adminOnly = false }) {
@@ -29,19 +28,16 @@ function PrivateRoute({ children, adminOnly = false }) {
 }
 
 function AppRoutes() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="App">
-      {/* Affiche la Navbar pour TOUT le monde SAUF sur les pages admin */}
-      {user && window.location.pathname.startsWith('/admin') ? null : user && <Navbar />}
+      {user && !window.location.pathname.startsWith('/admin') && <Navbar />}
       
       <Routes>
-        {/* Pages publiques */}
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
 
-        {/* Accueil - Même vue pour tout le monde */}
         <Route path="/" element={
           <PrivateRoute>
             <main className="container"><Dashboard /></main>
@@ -49,7 +45,6 @@ function AppRoutes() {
           </PrivateRoute>
         } />
 
-        {/* Pages utilisateur avec Navbar */}
         <Route path="/catalogue" element={
           <PrivateRoute>
             <main className="container"><Catalogue /></main>
@@ -68,15 +63,19 @@ function AppRoutes() {
             <Footer />
           </PrivateRoute>
         } />
-         {/* AJOUTE ICI */}
-<Route path="/favoris" element={
-  <PrivateRoute>
-    <main className="container"><Favoris /></main>
-    <Footer />
-  </PrivateRoute>
-} />
+        <Route path="/profil" element={
+          <PrivateRoute>
+            <main className="container"><Profil /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
+        <Route path="/favoris" element={
+          <PrivateRoute>
+            <main className="container"><Favoris /></main>
+            <Footer />
+          </PrivateRoute>
+        } />
 
-        {/* Pages Admin avec Sidebar (pas de Navbar normale) */}
         <Route path="/admin/*" element={
           <PrivateRoute adminOnly>
             <AdminLayout>
@@ -86,6 +85,7 @@ function AppRoutes() {
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="emprunts" element={<AdminEmprunts />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="recommandations" element={<Recommandations />} />
               </Routes>
             </AdminLayout>
           </PrivateRoute>

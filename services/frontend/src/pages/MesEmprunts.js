@@ -9,11 +9,11 @@ function MesEmprunts() {
   const [emprunts, setEmprunts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadEmprunts(); }, []);
+  useEffect(() => { loadEmprunts(); }, [user]);
 
   const loadEmprunts = async () => {
     const all = await api.getEmprunts();
-    setEmprunts(all.filter(e => e.utilisateur_id === user.id));
+    setEmprunts(all.filter(e => e.email === user.email));
     setLoading(false);
   };
 

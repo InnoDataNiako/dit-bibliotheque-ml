@@ -13,7 +13,8 @@ function MesEmprunts() {
 
   const loadEmprunts = async () => {
     const all = await api.getEmprunts();
-    setEmprunts(all.filter(e => e.utilisateur_id === user.id));
+    const mesEmps = all.filter(e => e.email === user.email);
+    setEmprunts(mesEmps);
     setLoading(false);
   };
 
@@ -27,16 +28,7 @@ function MesEmprunts() {
     return diff;
   };
 
-  const getStatutClass = (statut, dateRetour) => {
-    if (statut === 'Retourné') return 'retourne';
-    if (statut === 'En retard') return 'retard';
-    const jours = getJoursRestants(dateRetour);
-    if (jours < 0) return 'retard';
-    return 'en-cours';
-  };
-
   const enCours = emprunts.filter(e => e.statut !== 'Retourné').length;
-  const enRetard = emprunts.filter(e => e.statut === 'En retard' || (e.statut === 'En cours' && getJoursRestants(e.date_retour_prevue) < 0)).length;
 
   if (loading) return <div className="loading"><FiBookOpen className="spinner" size={40} /><p>Chargement...</p></div>;
 
@@ -55,10 +47,6 @@ function MesEmprunts() {
           <strong>{enCours}</strong>
           <span>En cours</span>
         </div>
-        <div className="emprunt-stat-mini">
-          <strong style={{color:'#dc2626'}}>{enRetard}</strong>
-          <span>En retard</span>
-        </div>
       </div>
 
       {emprunts.length === 0 ? (
@@ -72,20 +60,21 @@ function MesEmprunts() {
         </div>
       ) : (
         emprunts.map(e => {
-          const statutClass = getStatutClass(e.statut, e.date_retour_prevue);
           const jours = getJoursRestants(e.date_retour_prevue);
+          const isRetard = e.statut === 'En retard' || (e.statut === 'En cours' && jours < 0);
+          const isRetourne = e.statut === 'Retourné';
           
           return (
-            <div key={e.id} className={`emprunt-card ${statutClass}`}>
+            <div key={e.id} className={`emprunt-card ${isRetard ? 'retard' : isRetourne ? 'retourne' : 'en-cours'}`}>
               <div className="emprunt-book-info">
                 <div className="emprunt-book-cover">
                   <FiBookOpen size={28} />
                 </div>
                 <div className="emprunt-book-details">
                   <h3>{e.titre}</h3>
-                  <p className="author">✍️ {e.auteur}</p>
-                  <span className={`emprunt-statut-badge ${statutClass === 'retard' ? 'retard' : statutClass === 'retourne' ? 'retourne' : 'en-cours'}`}>
-                    {statutClass === 'retard' ? '🔴 En retard' : statutClass === 'retourne' ? '✅ Retourné' : '🟡 En cours'}
+                  <p className="author">{e.auteur}</p>
+                  <span className={`emprunt-statut-badge ${isRetard ? 'retard' : isRetourne ? 'retourne' : 'en-cours'}`}>
+                    {isRetard ? 'En retard' : isRetourne ? 'Retourné' : 'En cours'}
                   </span>
                 </div>
               </div>
@@ -98,15 +87,15 @@ function MesEmprunts() {
                 <div className="emprunt-date">
                   <span className="emprunt-date-label"><FiClock size={12} /> Retour prévu</span>
                   <span className="emprunt-date-value">{new Date(e.date_retour_prevue).toLocaleDateString('fr-FR')}</span>
-                  {e.statut !== 'Retourné' && (
+                  {!isRetourne && (
                     <span className={`jours-restants ${jours < 0 ? 'urgent' : jours <= 2 ? 'warning' : 'ok'}`}>
-                      {jours < 0 ? `⚠️ ${Math.abs(jours)}j de retard` : jours === 0 ? "Aujourd'hui !" : `${jours}j restants`}
+                      {jours < 0 ? `${Math.abs(jours)}j de retard` : jours === 0 ? "Aujourd'hui !" : `${jours}j restants`}
                     </span>
                   )}
                 </div>
               </div>
 
-              {e.statut !== 'Retourné' && (
+              {!isRetourne && (
                 <div className="emprunt-action">
                   <button className="btn-retour" onClick={() => handleRetour(e.id)}>
                     <FiRotateCcw /> Retourner

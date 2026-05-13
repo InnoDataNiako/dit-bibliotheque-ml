@@ -68,6 +68,7 @@ def register():
         
         cur.execute('''
             INSERT INTO users (nom, prenom, email, password_hash, role)
+        cur.execute('INSERT INTO utilisateurs (nom, prenom, email, type_utilisateur) VALUES (%s, %s, %s, %s) ON CONFLICT (email) DO NOTHING', (data['nom'], data['prenom'], data['email'], data['role'].capitalize()))
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id, nom, prenom, email, role, date_inscription
         ''', (data['nom'], data['prenom'], data['email'], password_hash, data['role']))
