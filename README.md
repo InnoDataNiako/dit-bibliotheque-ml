@@ -472,7 +472,3 @@ data/metrics.json  0.25   0.5
 
 *Projet académique — Master 2 Intelligence Artificielle — Dakar Institute of Technology (DIT) — Mai 2026*
 ```
-
----
-
-**👉 Copie le code ci-dessus dans ton README.md et push !** 🎉
