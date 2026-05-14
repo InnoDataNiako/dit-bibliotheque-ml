@@ -31,7 +31,7 @@ Plateforme de gestion de bibliothèque académique avec un **système de recomma
 
 ---
 
-## 🎯 Contexte et problématique
+##  Contexte et problématique
 
 L'université **Dakar Institute of Technology (DIT)** gère actuellement sa bibliothèque de manière manuelle, ce qui entraîne :
 
@@ -44,11 +44,11 @@ La direction du DIT souhaite une **plateforme web moderne** capable de répondre
 
 ---
 
-## 💡 Notre solution
+##  Notre solution
 
 **BiblioPro DIT** est une plateforme web  offrant :
 
-### 👑 Administrateur
+###  Administrateur
 
 L'administrateur dispose d'un **dashboard dédié** avec :
 
@@ -70,7 +70,7 @@ L'administrateur dispose d'un **dashboard dédié** avec :
 
 ---
 
-## 🏗️ Architecture technique
+##  Architecture technique
 
 L'application repose sur une **architecture microservices** conteneurisée avec Docker. Chaque service est indépendant et communique via des API REST.
 
@@ -85,13 +85,13 @@ L'application repose sur une **architecture microservices** conteneurisée avec 
 
 Tous les services partagent une **base PostgreSQL unique**, conteneurisée avec volumes Docker.
 
-### 🖼️ Diagramme d'architecture
+###  Diagramme d'architecture
 
 ![Architecture du système](diagramme-architecture.png)
 
 ---
 
-## 🧰 Technologies utilisées
+##  Technologies utilisées
 
 | Composant | Technologie |
 |-----------|-------------|
@@ -108,7 +108,7 @@ Tous les services partagent une **base PostgreSQL unique**, conteneurisée avec 
 
 ---
 
-## 📁 Structure du projet
+##  Structure du projet
 
 ```
 bibliotheque-dit/
@@ -141,7 +141,7 @@ bibliotheque-dit/
 
 ---
 
-## 🌿 Branches Git Flow
+##  Branches Git Flow
 
 | Branche | Contenu |
 |---------|---------|
@@ -159,7 +159,7 @@ bibliotheque-dit/
 
 ---
 
-## 🚀 Installation et lancement
+##  Installation et lancement
 
 ### Prérequis
 
@@ -197,7 +197,7 @@ open http://localhost:3000
 
 ## 📡 Services API
 
-### 🔐 Auth (port 8084)
+###  Auth (port 8084)
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | POST | `/api/auth/login` | Connexion |
@@ -205,7 +205,7 @@ open http://localhost:3000
 | GET | `/api/auth/me` | Profil connecté |
 | GET | `/api/auth/users` | Liste utilisateurs (admin) |
 
-### 📖 Livres (port 8081)
+###  Livres (port 8081)
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | GET | `/api/livres` | Liste des livres |
@@ -216,7 +216,7 @@ open http://localhost:3000
 | POST | `/api/livres/upload` | Upload image couverture |
 | GET | `/api/categories` | Liste catégories |
 
-### 📋 Emprunts (port 8083)
+###  Emprunts (port 8083)
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | GET | `/api/emprunts` | Tous les emprunts |
@@ -226,7 +226,7 @@ open http://localhost:3000
 | GET | `/api/emprunts/retards` | Livres en retard |
 | GET | `/api/emprunts/export` | Export CSV (ML) |
 
-### 🤖 Recommandation IA (port 8000)
+###  Recommandation IA (port 8000)
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | GET | `/recommandations/{user_id}` | Recommandations personnalisées |
@@ -234,7 +234,7 @@ open http://localhost:3000
 
 ---
 
-## 🤖 Système de recommandation IA
+##  Système de recommandation IA
 
 ### Algorithme
 
@@ -250,7 +250,7 @@ open http://localhost:3000
 
 ---
 
-## 📦 DVC - Data Version Control
+##  DVC - Data Version Control
 
 ### Pipeline (3 étapes)
 
@@ -288,7 +288,7 @@ dvc push           # Pousser vers le remote
 |---------|-------------------|--------|
 | ![Favoris](image-dit-bu/Favoris.png) | ![Recommandations](image-dit-bu/Recommandations.png) | ![Profil](image-dit-bu/profil.png) |
 
-### 🔧 Interface Admin
+###  Interface Admin
 
 | Dashboard | Gérer Livres | Gérer Catégories |
 |-----------|--------------|------------------|
@@ -310,7 +310,7 @@ dvc push           # Pousser vers le remote
 
 ---
 
-## 🔑 Comptes de test
+##  Comptes de test
 
 | Rôle | Email | Mot de passe |
 |------|-------|-------------|
@@ -320,14 +320,25 @@ dvc push           # Pousser vers le remote
 
 ---
 
-## ✍️ Auteur
+## Auteur
 
 **Niako Kebe**
 
 - Email : kebeniako17@gmail.com
 - GitHub : [InnoDataNiako](https://github.com/InnoDataNiako)
-
 ---
 
-*Projet académique - Master 2 Intelligence Artificielle - Dakar Institute of Technology (DIT) - Mai 2026*
-```
+ 🔮 Perspectives d'évolution
+
+-  **Notifications email** : envoi automatique de rappels avant la date de retour et alertes de retard
+-  **Scan ISBN** : ajout de livres par scan du code-barres
+-  **Application mobile** : version React Native pour iOS et Android
+-  **Paiement en ligne** : système d'amendes pour les retards via Wave ou Orange Money
+-  **Authentification OAuth2** : connexion via Google, LinkedIn ou comptes universitaires
+-  **Tableau de bord avancé** : graphiques d'analyse des emprunts par période, catégorie, utilisateur
+-  **Déploiement Kubernetes** : orchestration avancée pour la mise en production à grande échelle
+-  **API Gateway** : centralisation des APIs avec rate limiting et monitoring
+
+  ---
+  
+*VERSION 1 ~ Projet académique - Master  Intelligence Artificielle - Dakar Institute of Technology (DIT) - Mai 2026*
