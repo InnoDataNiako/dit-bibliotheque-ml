@@ -234,6 +234,59 @@ open http://localhost:3000
 
 ---
 
+##  Tests des endpoints API
+
+### Tester le service Auth
+
+# Connexion
+curl -X POST http://localhost:8084/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@dit.sn","password":"admin123"}'
+
+# Inscription
+curl -X POST http://localhost:8084/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"nom":"Test","prenom":"User","email":"test@dit.sn","password":"pass123","role":"etudiant"}'
+  
+### Tester le service Livres
+
+# Lister les livres
+curl http://localhost:8081/api/livres
+
+# Rechercher un livre
+curl "http://localhost:8081/api/livres/search?q=Python&type=titre"
+
+# Ajouter un livre
+curl -X POST http://localhost:8081/api/livres \
+  -H "Content-Type: application/json" \
+  -d '{"titre":"Nouveau Livre","auteur":"Auteur","isbn":"123-456"}'
+
+  
+### Tester le service Emprunts
+
+  # Emprunter un livre
+curl -X POST http://localhost:8083/api/emprunts \
+  -H "Content-Type: application/json" \
+  -d '{"email":"oumar.ba@dit.sn","livre_id":10}'
+  
+  # Voir tous les emprunts
+  curl http://localhost:8083/api/emprunts
+  
+  # Export CSV
+  curl http://localhost:8083/api/emprunts/export
+
+### Tester le service Recommandation IA
+
+# Entraîner le modèle
+curl -X POST http://localhost:8000/train
+
+# Obtenir des recommandations
+curl http://localhost:8000/recommandations/1
+
+  
+---
+
+
 ##  Système de recommandation IA
 
 ### Algorithme
