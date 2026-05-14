@@ -1,4 +1,3 @@
-
 # 📚 BiblioPro DIT - Bibliothèque Numérique Intelligente
 
 ![Version](https://img.shields.io/badge/version-1.0.0-red)
@@ -9,6 +8,8 @@
 ![IA](https://img.shields.io/badge/ML-scikit--learn-F7931E)
 
 Plateforme de gestion de bibliothèque académique avec un **système de recommandation par Intelligence Artificielle**.
+
+🌐 **Démo en ligne** : [https://dit-bibliotheque-ml-v1.vercel.app](https://dit-bibliotheque-ml-v1.vercel.app)
 
 ---
 
@@ -24,6 +25,7 @@ Plateforme de gestion de bibliothèque académique avec un **système de recomma
 - [Services API](#services-api)
 - [Système de recommandation IA](#système-de-recommandation-ia)
 - [DVC - Data Version Control](#dvc---data-version-control)
+- [Captures d'écran](#captures-décran)
 - [Comptes de test](#comptes-de-test)
 - [Auteur](#auteur)
 
@@ -31,12 +33,12 @@ Plateforme de gestion de bibliothèque académique avec un **système de recomma
 
 ## 🎯 Contexte et problématique
 
-L’université **Dakar Institute of Technology (DIT)** gère actuellement sa bibliothèque de manière manuelle, ce qui entraîne :
+L'université **Dakar Institute of Technology (DIT)** gère actuellement sa bibliothèque de manière manuelle, ce qui entraîne :
 
 - Difficulté de suivi des livres et des emprunts
-- Absence de statistiques fiables sur l’utilisation des ressources
+- Absence de statistiques fiables sur l'utilisation des ressources
 - Gestion inefficace des retours et des retards
-- Manque d’accès numérique pour les étudiants et professeurs
+- Manque d'accès numérique pour les étudiants et professeurs
 
 La direction du DIT souhaite une **plateforme web moderne** capable de répondre à ces enjeux.
 
@@ -44,32 +46,33 @@ La direction du DIT souhaite une **plateforme web moderne** capable de répondre
 
 ## 💡 Notre solution
 
-**BiblioPro DIT** est une plateforme web complète offrant :
+**BiblioPro DIT** est une plateforme web  offrant :
 
 ### 👑 Administrateur
 
-L’administrateur dispose d’un **dashboard dédié** avec :
+L'administrateur dispose d'un **dashboard dédié** avec :
 
-- **Vue d’ensemble** : statistiques en temps réel (livres, utilisateurs, emprunts, retards)
-- **Gestion du catalogue** : ajout, modification, suppression de livres + upload d’image
+- **Vue d'ensemble** : statistiques en temps réel (livres, utilisateurs, emprunts, retards)
+- **Gestion du catalogue** : ajout, modification, suppression de livres + upload d'image
 - **Gestion des catégories** : création personnalisée avec code couleur
 - **Gestion des emprunts** : consultation, enregistrement des retours, export CSV
 - **Gestion des utilisateurs** : visualisation des comptes, rôles et statuts
 - **Accès au site utilisateur** : navigation comme un utilisateur standard pour vérifier le rendu
+-**Il Peut choisir l'ID** de n'importe quel utilisateur pour générer des recommandations personnalisées. Utile pour vérifier les suggestions de chaque lecteur.
 
 ### 👥 Autres rôles
 
 | Rôle | Fonctionnalités |
 |---|---|
-| **Bibliothécaire** | Mêmes droits que l’administrateur pour la gestion quotidienne :<br>- Gérer le catalogue<br>- Enregistrer emprunts et retours<br>- Consulter l’historique<br>- Exporter les données CSV |
-| **Étudiant** | - Catalogue avec filtres et recherche<br>- Emprunt en 1 clic (durée : **5 jours**)<br>- Suivi des emprunts (jours restants)<br>- Blocage si livre déjà emprunté<br>- Recommandations IA personnalisées<br>- Favoris (avec compteur dans la navbar) |
-| **Professeur** | Mêmes fonctionnalités que l’étudiant, mais :<br>- **Durée de prêt étendue : 10 jours** |
+| **Bibliothécaire** | Mêmes droits que l'administrateur pour la gestion quotidienne : gérer le catalogue, enregistrer emprunts et retours, consulter l'historique, exporter les données CSV |
+| **Étudiant** | Catalogue avec filtres et recherche, emprunt en 1 clic , suivi des emprunts (jours restants), recommandations IA personnalisées, favoris (avec compteur dans la navbar) |
+| **Professeur** | Mêmes fonctionnalités que l'étudiant, mais durée de prêt étendue |
 
 ---
 
 ## 🏗️ Architecture technique
 
-L’application repose sur une **architecture microservices** conteneurisée avec Docker. Chaque service est indépendant et communique via des API REST.
+L'application repose sur une **architecture microservices** conteneurisée avec Docker. Chaque service est indépendant et communique via des API REST.
 
 | Service | Technologies | Responsabilités |
 |---|---|---|
@@ -82,7 +85,7 @@ L’application repose sur une **architecture microservices** conteneurisée ave
 
 Tous les services partagent une **base PostgreSQL unique**, conteneurisée avec volumes Docker.
 
-###  Diagramme d’architecture
+### 🖼️ Diagramme d'architecture
 
 ![Architecture du système](diagramme-architecture.png)
 
@@ -100,7 +103,8 @@ Tous les services partagent une **base PostgreSQL unique**, conteneurisée avec 
 | **Conteneurisation** | Docker + Docker Compose |
 | **Versioning Code** | Git + Git Flow |
 | **Versioning Data/Modèle** | DVC |
-| **Remote Storage** | Google Drive (configurable) |
+| **Déploiement** | Vercel |
+| **CI/CD** | GitHub Actions |
 
 ---
 
@@ -137,7 +141,7 @@ bibliotheque-dit/
 
 ---
 
-##  Branches Git Flow
+## 🌿 Branches Git Flow
 
 | Branche | Contenu |
 |---------|---------|
@@ -155,7 +159,7 @@ bibliotheque-dit/
 
 ---
 
-##  Installation et lancement
+## 🚀 Installation et lancement
 
 ### Prérequis
 
@@ -173,10 +177,7 @@ cd dit-bibliotheque-ml
 # 2. Lancer tous les services
 docker compose --profile dev up -d
 
-# 3. Initialiser la base de données
-docker exec bibliotheque-db psql -U admin -d bibliotheque -f /docker-entrypoint-initdb.d/init.sql
-
-# 4. Accéder au frontend
+# 3. Accéder au frontend
 open http://localhost:3000
 ```
 
@@ -194,7 +195,7 @@ open http://localhost:3000
 
 ---
 
-##  Services API
+## 📡 Services API
 
 ### 🔐 Auth (port 8084)
 | Méthode | Endpoint | Description |
@@ -245,50 +246,71 @@ open http://localhost:3000
 
 | Version | RMSE | MAE | Utilisateurs | Livres |
 |---------|------|-----|--------------|--------|
-| v1.0 | 0.5 | 0.25 | 4 | 3 |
+| v1.0 | 0.5 | 0.25 | 9 | 9 |
 
 ---
 
-##  DVC - Data Version Control
+## 📦 DVC - Data Version Control
 
 ### Pipeline (3 étapes)
 
-| Étape | Script | Entrée | Sortie | Description |
-|-------|--------|--------|--------|-------------|
-| **Preprocessing** | `dvc/preprocess.py` | `data/loans.csv` | `data/loans_clean.csv` | Nettoyage (valeurs manquantes, doublons) |
-| **Entraînement** | `dvc/train.py` | `data/loans_clean.csv` | `data/model.pkl` + `data/metrics.json` | Entraînement SVD + calcul RMSE/MAE |
-| **Évaluation** | `dvc/evaluate.py` | `data/metrics.json` | Console | Affichage et validation des performances |
+| Étape | Script | Entrée | Sortie |
+|-------|--------|--------|--------|
+| **Preprocessing** | `dvc/preprocess.py` | `loans.csv` | `loans_clean.csv` |
+| **Entraînement** | `dvc/train.py` | `loans_clean.csv` | `model.pkl` + `metrics.json` |
+| **Évaluation** | `dvc/evaluate.py` | `metrics.json` | Console |
 
 ### Commandes utiles
 
 ```bash
-# Exécuter le pipeline complet
-dvc repro
-
-# Afficher les métriques
-dvc metrics show
-
-# Comparer deux versions
-dvc metrics diff
-
-# Pousser les données vers le remote
-dvc push
+dvc repro          # Exécuter le pipeline
+dvc metrics show   # Afficher les métriques
+dvc metrics diff   # Comparer deux versions
+dvc push           # Pousser vers le remote
 ```
 
-![DVC réussi](dvd-reusi.png)
-
-### Métriques actuelles
-
-```
-Path               mae    rmse
-data/metrics.json  0.25   0.5
-```
-
-![Métriques](metrique.png)
+![DVC Pipeline](dvd-reusi.png)
+![Métriques DVC](metrique.png)
 
 ---
 
-## 👨‍💻 Comptes de test
+## 📸 Captures d'écran
+
+### 👤 Interface Utilisateur
+
+![Login](image-dit-bu/Login.png) | 
+
+| Accueil | Catalogue | Mes Emprunts |
+|---------|-----------|--------------|
+| ![Accueil](image-dit-bu/Accueil.png) | ![Catalogue](image-dit-bu/Catalogue.png) | ![Mes Emprunts](image-dit-bu/Mes%20Emprunts.png) |
+
+| Favoris | Recommandations IA | Profil |
+|---------|-------------------|--------|
+| ![Favoris](image-dit-bu/Favoris.png) | ![Recommandations](image-dit-bu/Recommandations.png) | ![Profil](image-dit-bu/profil.png) |
+
+### 🔧 Interface Admin
+
+| Dashboard | Gérer Livres | Gérer Catégories |
+|-----------|--------------|------------------|
+| ![Dashboard Admin](image-dit-bu/Dashboard%20Admin.png) | ![Gérer Livres](image-dit-bu/Gérer%20Livres.png) | ![Gérer Catégories](image-dit-bu/Gérer%20Catégories.png) |
+
+| Gérer Emprunts | Gérer Utilisateurs | recommandation|
+|----------------|-------------------|------------------|
+| ![Gérer Emprunts](image-dit-bu/Gérer%20Emprunts.png) | ![Gérer Utilisateurs](image-dit-bu/Gerer-utilisateur.png) | ![Ajouter Livre](image-dit-bu/gerer-recommadation-pour-admin.png) |
+
+### ⚙️ Infrastructure
+
+| Dépôt GitHub | Branches Git | GitHub Actions CI/CD |
+|-------------|-------------|---------------------|
+| ![Dépôt](image-dit-bu/Dépôt%20GitHub.png) | ![Branches](Branches.png) | ![CI/CD](image-dit-bu/GIT-ADCT.png) |
+
+| Docker Compose | DVC Pipeline | Login |
+|----------------|--------------|-------|
+| ![Docker](image-dit-bu/Terminal-docker%20ps.png) | ![DVC](image-dit-bu/dvc%20repro.png) | ![Login](image-dit-bu/Login.png) |
+
+---
+
+## 🔑 Comptes de test
 
 | Rôle | Email | Mot de passe |
 |------|-------|-------------|
@@ -303,8 +325,9 @@ data/metrics.json  0.25   0.5
 **Niako Kebe**
 
 - Email : kebeniako17@gmail.com
+- GitHub : [InnoDataNiako](https://github.com/InnoDataNiako)
 
 ---
 
 *Projet académique - Master 2 Intelligence Artificielle - Dakar Institute of Technology (DIT) - Mai 2026*
-
+```
