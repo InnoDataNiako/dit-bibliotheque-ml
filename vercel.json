@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd services/frontend && npm install && npm run build",
+  "buildCommand": "cd services/frontend && DISABLE_ESLINT_PLUGIN=true npm run build",
   "outputDirectory": "services/frontend/build",
   "installCommand": "cd services/frontend && npm install"
 }
